@@ -15,11 +15,12 @@ func main() {
 		Addr:    ":8080",
 		Handler: mux,
 	}
+
 	apiCfg := apiConfig{}
 
-	mux.HandleFunc("GET /healthz", HandleHealthz)
-	mux.HandleFunc("GET /metrics", apiCfg.HandleMetrics)
-	mux.HandleFunc("/reset", apiCfg.HandleReset)
+	mux.HandleFunc("GET /api/healthz", HandleHealthz)
+	mux.HandleFunc("GET /admin/metrics", apiCfg.HandleMetrics)
+	mux.HandleFunc("GET /api/reset", apiCfg.HandleReset)
 	mux.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app/", http.FileServer(http.Dir(".")))))
 
 	err := server.ListenAndServe()
@@ -42,7 +43,7 @@ func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 }
 
 func (cfg *apiConfig) HandleMetrics(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	hitsResponse := fmt.Sprintf("Hits: %d", cfg.fileserverHits)
 	w.Write([]byte(hitsResponse))
