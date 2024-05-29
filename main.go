@@ -12,6 +12,7 @@ type apiConfig struct {
 }
 
 type Chirp struct {
+	Id   int    `json:"id"`
 	Body string `json:"body"`
 }
 type CleanedChirp struct {
