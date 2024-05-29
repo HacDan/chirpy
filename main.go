@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 type apiConfig struct {
@@ -13,13 +14,12 @@ type apiConfig struct {
 type Chirp struct {
 	Body string `json:"body"`
 }
+type CleanedChirp struct {
+	CleanedBody string `json:"cleaned_body"`
+}
 
 type RespError struct {
 	Error string `json:"error"`
-}
-
-type RespValid struct {
-	Valid bool `json:"valid"`
 }
 
 func main() {
@@ -85,12 +85,41 @@ func HandleValidateChirp(w http.ResponseWriter, req *http.Request) {
 		w.Write(dat)
 		return
 	}
+	if strings.Contains(strings.ToLower(chirp.Body), "kerfuffle") || strings.Contains(strings.ToLower(chirp.Body), "sharbert") || strings.Contains(strings.ToLower(chirp.Body), "sharbert") {
+		splitChirp := strings.Split(chirp.Body, " ")
 
-	respValid := RespValid{
-		Valid: true,
+		for i, word := range splitChirp {
+			if strings.ToLower(word) == "kerfuffle" {
+				splitChirp[i] = "****"
+			}
+			if strings.ToLower(word) == "sharbert" {
+				splitChirp[i] = "****"
+			}
+			if strings.ToLower(word) == "fornax" {
+				splitChirp[i] = "****"
+			}
+		}
+
+		cleanedChirp := CleanedChirp{
+			CleanedBody: strings.Join(splitChirp, " "),
+		}
+
+		dat, err := json.Marshal(cleanedChirp)
+		if err != nil {
+			w.WriteHeader(500)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		w.Write(dat)
+		return
 	}
 
-	dat, err := json.Marshal(respValid)
+	cleanedChirp := CleanedChirp{
+		CleanedBody: chirp.Body,
+	}
+	dat, err := json.Marshal(cleanedChirp)
 	if err != nil {
 		w.WriteHeader(500)
 		return
